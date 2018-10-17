@@ -6,7 +6,8 @@ sidebar <- dashboardSidebar(
         menuItem("Isothermal fitting", tabName = "isothermal", icon = icon("thermometer-1")),
         menuItem("Non-isothermal fitting", tabName = "dynamic", icon = icon("line-chart")),
         menuItem("About", tabName = "about", icon = icon("envelope")),
-        menuItem("Original article", icon = icon("trophy"),
-                 href = "http://www.sciencedirect.com/science/article/pii/S0963996917300200")
+        menuItem("Scientific articles", icon = icon("trophy"),tabName = "articles"),
+        menuItem("Github page", icon = icon("github"),
+                 href = "https://github.com/albgarre/bioinactivation_FE")
     )
 )

@@ -284,6 +284,25 @@ of Applied Mathematics and Food Microbiology of the Technical University of Cart
                                    url = {//www.sciencedirect.com/science/article/pii/S0963996917300200},
                                    }"
                 )
+                ),
+        
+        ## Articles tab
+        
+        tabItem(tabName = "articles",
+                tags$h3("Scientific article describing the user interface:"),
+                tags$h4("Bioinactivation FE: A free web application for modelling isothermal and dynamic microbial inactivation"),
+                tags$h4("Garre, A., Clemente-Carazo, M., Fernandez, P.S., Lindqvist, R., Egea, J.A."),
+                tags$h4("(2018) Food Research International, 112, 353-360"),
+                tags$h4("10.1016/j.foodres.2018.06.057"),
+                tags$hr(),
+                tags$h3("Scientific article describing the core functions:"),
+                tags$h4("Bioinactivation: Software for modelling dynamic microbial inactivation"),
+                tags$h4("Garre, A., Fernandez, P.S., Lindqvist, R., Egea, J.A."),
+                tags$h4("(2017) Food Research International, 93, 66-74"),
+                tags$h4("10.1016/j.foodres.2017.01.012") #,
+                # tags$hr(),
+                # tags$h3("Some of the articles that use bioinactivation:"),
+                # tags$h4()
                 )
     )
 )
