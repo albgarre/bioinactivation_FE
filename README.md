@@ -9,7 +9,7 @@ Bioinactivation FE is a user friendly interface to the functions for modelling m
 
 The application can be accessed freely in the following link:
 
-https://opada-upct.shinyapps.io/bioinactivation_SE/
+https://opada-upct.shinyapps.io/bioinactivationFull/
 
 When using Bioinactivation FE for scientific applications, please refer to it as:
 
