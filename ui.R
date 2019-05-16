@@ -6,6 +6,7 @@ options(shiny.reactlog=TRUE)
 library(shiny)
 library(shinydashboard)
 library("shinyIncubator")
+library(shinyBS)
 
 source("tableFileUI.R")
 source("predParsInput.R")
@@ -28,16 +29,6 @@ source("my_body.R")
 ## Lauch the application
 
 dashboardPage(header, sidebar, body)
-
-
-
-
-
-
-
-
-
-
 
 
 

@@ -6,6 +6,18 @@ body <- dashboardBody(
         
         tabItem(tabName = "prediction",
                 
+                ## Popup message
+                
+                bsModal(id = 'startupModal', title = 'Migration', trigger = '',
+                        size = 'large', 
+                        p("The tools developed by the group are being migrated to a new domain."),
+                        p("This link will soon stop working."),
+                        a("New site", href = "https://foodlab-upct.shinyapps.io/bioinactivationFE/")
+                        # p("A new version: https://foodlab-upct.shinyapps.io/bioinactivationFE/")
+                        ),
+                
+                ##
+                
                 fluidRow(
                     tableFileUI("pred_temp_input", label_2 = "temperature",
                                 inputBoxTitle = "Input Temperature",

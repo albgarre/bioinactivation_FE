@@ -21,7 +21,11 @@ source("isofitPars.R")
 
 ## Server
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
+    
+    ## Popup message
+    
+    toggleModal(session, "startupModal", toggle = "open")
     
     ## Header
     
