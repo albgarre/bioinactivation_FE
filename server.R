@@ -19,6 +19,26 @@ source("fitPars.R")
 source("tableFile3col.R")
 source("isofitPars.R")
 
+## Global variables
+
+par_description_map <- data.frame(
+    parameter = c("temp_ref", "D_R", "z", "N0", "delta_ref", "p", "n", "k_b", "temp_crit", "N_min", "C_c0",
+                  "k_ref", "Ea"),
+    description = c("Reference temperature.", "Treatment time required for one log-reduction.",
+                    "Temperature increase requried to reduce the D (or delta) value a 90%.",
+                    "Initial microbial count",
+                    "Treatment time required for the 1st log reduction.",
+                    "Shape factor of the Weibull distribution",
+                    "Shape factor of the Weibull distribution",
+                    "Slope of the b vs temperature curve for temperatures about the critical one",
+                    "Critical temperature for inactivation.",
+                    "Tail height.",
+                    "Initial value of the ideal substance defining the shoulder.",
+                    "Inactivation rate at the reference temperature",
+                    "Activation energy"),
+    stringsAsFactors = FALSE
+)
+
 ## Server
 
 shinyServer(function(input, output, session) {
@@ -32,10 +52,49 @@ shinyServer(function(input, output, session) {
     # output$notificationMenu <- renderMenu({
     #     dropdownMenu(type = "notifications",
     #                  notificationItem(
-    #                      text = "5 new users today",
+    #                      text = "5 new users today"
     #                      icon("users")
     #                  ))
     # })
+    
+    ## FSK2R
+    
+    output$fsk_pred_creators <- renderRHandsontable({
+        rhandsontable(data.frame(Email = c("google@chucknorris.com", NA), `Family name` = c("Doe", NA), `Given Name` = c("Jon", NA)),
+                      rowHeaders = NULL, readOnly = FALSE
+                      )
+    })
+    
+    output$fsk_pred_model <- renderRHandsontable({
+        my_prediction <- pred_simulation()
+        
+        out <- data.frame(parameter = names(my_prediction$model_parameters),
+                   estimate = unlist(my_prediction$model_parameters),
+                   unit = "",
+                   `Min value` = 0,
+                   `Max value` = "") %>%
+            left_join(., par_description_map, by = "parameter")
+        
+        rhandsontable(out,
+                      rowHeaders = NULL, readOnly = FALSE
+                      )
+    })
+    
+    output$fsk_iso_model <- renderRHandsontable({
+        my_model <- iso_fitted_model()
+        
+        out <- data.frame(parameter = names(my_model$parameters),
+                          estimate = unlist(my_model$parameters),
+                          unit = "",
+                          `Min value` = 0,
+                          `Max value` = "") %>%
+            left_join(., par_description_map, by = "parameter")
+        
+        rhandsontable(out,
+                      rowHeaders = NULL, readOnly = FALSE
+        )
+    })
+    
     
     ## Prediction module
     

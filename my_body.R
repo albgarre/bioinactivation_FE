@@ -8,13 +8,13 @@ body <- dashboardBody(
                 
                 ## Popup message
                 
-                bsModal(id = 'startupModal', title = 'Migration', trigger = '',
-                        size = 'large', 
-                        p("The tools developed by the group are being migrated to a new domain."),
-                        p("This link will soon stop working."),
-                        a("New site", href = "https://foodlab-upct.shinyapps.io/bioinactivationFE/")
-                        # p("A new version: https://foodlab-upct.shinyapps.io/bioinactivationFE/")
-                        ),
+                # bsModal(id = 'startupModal', title = 'Migration', trigger = '',
+                #         size = 'large', 
+                #         p("The tools developed by the group are being migrated to a new domain."),
+                #         p("This link will soon stop working."),
+                #         a("New site", href = "https://foodlab-upct.shinyapps.io/bioinactivationFE/")
+                #         # p("A new version: https://foodlab-upct.shinyapps.io/bioinactivationFE/")
+                #         ),
                 
                 ##
                 
@@ -74,7 +74,73 @@ body <- dashboardBody(
                         collapsible = TRUE,
                         downloadButton("pred_down_curve", "Survivor curve"),
                         downloadButton("pred_down_residuals", "Residual table")
-                        )
+                        )# ,
+                    # box(title = "Export as FSK", status = "danger", solidHeader = TRUE, collapsible = TRUE,
+                    #     tabsetPanel(
+                    #         tabPanel("General Information",
+                    #                  textInput("fsk_pred_name", "Name"),
+                    #                  textInput("fsk_pred_source", "Source"),
+                    #                  textInput("fsk_pred_identifier", "Identifier"),
+                    #                  dateInput("fsk_pred_date", "Creation Date"),
+                    #                  textInput("fsk_pred_rights", "Rights", value = "Creative Commons Attribution-NonCommercial 4.0"),
+                    #                  textInput("fsk_pred_language", "Language", value = "English"),
+                    #                  tags$h4("Creators"),
+                    #                  rHandsontableOutput("fsk_pred_creators")
+                    #                  # matrixInput("fsk_pred_creators", "Email - Family name - Given name",
+                    #                  #             data = data.frame(email = "someone@mail.com", f_name = "Doe", g_name = "Jon")
+                    #                  #             )
+                    #                  
+                    #         ),
+                    #         tabPanel("Scope",
+                    #                  textInput("fsk_pred_productName", "Product unit"),
+                    #                  textInput("fsk_pred_hazardName", "Hazard name"),
+                    #                  textInput("fsk_pred_hazardDescript", "Hazard description"),
+                    #                  textInput("fsk_pred_hazardType", "Hazard type")
+                    #         ),
+                    #         tabPanel("Data background",
+                    #                  textInput("fsk_pred_title", "Study title"),
+                    #                  textInput("fsk_pred_descrtiption", "Study Description")
+                    #         ),
+                    #         tabPanel("Model math",
+                    #                  rHandsontableOutput("fsk_pred_model")
+                    #                  ),
+                    #         tabPanel("Export",
+                    #                  textInput("fsk_pred_filename", "File name", value = "pred_from_bioinactivation.fskx"),
+                    #                  downloadButton("fsk_pred_download", "Download")
+                    #         )
+                    #     )
+                    # )
+                    
+                ),
+                fluidRow(
+                    # box(title = "Export as FSK", status = "danger", solidHeader = TRUE,
+                    #     tabsetPanel(
+                    #         tabPanel("General Information",
+                    #                  textInput("fsk_pred_name", "Name"),
+                    #                  textInput("fsk_pred_source", "Source"),
+                    #                  textInput("fsk_pred_identifier", "Identifier"),
+                    #                  dateInput("fsk_pred_date", "Creation Date"),
+                    #                  textInput("fsk_pred_rights", "Rights", value = "Creative Commons Attribution-NonCommercial 4.0"),
+                    #                  textInput("fsk_pred_language", "Language", value = "English"),
+                    #                  tags$h4("Creators")
+                    #         ),
+                    #         tabPanel("Scope",
+                    #                  textInput("fsk_pred_productName", "Product unit"),
+                    #                  textInput("fsk_pred_hazardName", "Hazard name"),
+                    #                  textInput("fsk_pred_hazardDescript", "Hazard description"),
+                    #                  textInput("fsk_pred_hazardType", "Hazard type")
+                    #         ),
+                    #         tabPanel("Data background",
+                    #                  textInput("fsk_pred_title", "Study title"),
+                    #                  textInput("fsk_pred_descrtiption", "Study Description")
+                    #         ),
+                    #         tabPanel("Model math"),
+                    #         tabPanel("Export",
+                    #                  textInput("fsk_pred_filename", "File name", value = "pred_from_bioinactivation.fskx"),
+                    #                  downloadButton("fsk_pred_download", "Download")
+                    #         )
+                    #     )
+                    # )
                 )
         ),
         
@@ -120,11 +186,40 @@ body <- dashboardBody(
                         tags$h3("Shapiro-Wilk normality test of the residuals"),
                         verbatimTextOutput("iso_residuals_normality")
                         )
-                ) # ,
-                # fluidRow(
-                #     box(title = "Export results", status = "danger", solidHeader = TRUE
-                #     )
-                # )
+                ),
+                fluidRow(
+                    # box(title = "Export as FSK", status = "danger", solidHeader = TRUE, collapsible = TRUE,
+                    #     tabsetPanel(
+                    #         tabPanel("General Information",
+                    #                  textInput("fsk_iso_name", "Name"),
+                    #                  textInput("fsk_iso_source", "Source"),
+                    #                  textInput("fsk_iso_identifier", "Identifier"),
+                    #                  dateInput("fsk_iso_date", "Creation Date"),
+                    #                  textInput("fsk_iso_rights", "Rights", value = "Creative Commons Attribution-NonCommercial 4.0"),
+                    #                  textInput("fsk_iso_language", "Language", value = "English"),
+                    #                  tags$h4("Creators")
+                    #         ),
+                    #         tabPanel("Scope",
+                    #                  textInput("fsk_iso_productName", "Product unit"),
+                    #                  textInput("fsk_iso_hazardName", "Hazard name"),
+                    #                  textInput("fsk_iso_hazardDescript", "Hazard description"),
+                    #                  textInput("fsk_iso_hazardType", "Hazard type")
+                    #         ),
+                    #         tabPanel("Data background",
+                    #                  textInput("fsk_iso_title", "Study title"),
+                    #                  textInput("fsk_iso_descrtiption", "Study Description")
+                    #         ),
+                    #         tabPanel("Model math",
+                    #                  rHandsontableOutput("fsk_iso_model")
+                    #                  ),
+                    #         tabPanel("Export",
+                    #                  textInput("fsk_iso_filename", "File name", value = "fit_from_bioinactivation.fskx"),
+                    #                  checkboxInput("fsk_iso_data", "Include data?"),
+                    #                  downloadButton("fsk_iso_download", "Download")
+                    #         )
+                    #     )
+                    # )
+                )
                 ),
         
         ## Dynamic tab
@@ -158,14 +253,21 @@ body <- dashboardBody(
                         solidHeader = TRUE, collapsible = TRUE,
                         selectInput("dyna_algorithm", "Fitting algorithm",
                                     list(`Non-linear regression` = "nlr",
-                                         `Adaptive Monte Carlo` = "MCMC")
+                                         `Adaptive Monte Carlo` = "MCMC",
+                                         `Bayesian Monte Carlo` = "bayesian")
                                     ),
                         conditionalPanel(
-                            condition = "input.dyna_algorithm == 'MCMC'",
+                            condition = "input.dyna_algorithm != 'nlr'",
                             numericInput("dyna_niters", "Number of iterations",
                                          1000, min = 0),
                             actionButton("btn_dyna_seed", "Reset Seed")
                         ),
+                        # conditionalPanel(
+                        #     condition = "input.dyna_algorithm == 'bayesian'",
+                        #     numericInput("dyna_niters", "Number of iterations",
+                        #                  1000, min = 0),
+                        #     actionButton("btn_dyna_seed", "Reset Seed")
+                        # ),
                         tags$hr(),
                         actionButton("dyna_fit_button", "Fit the model")
                         ),
@@ -223,7 +325,35 @@ body <- dashboardBody(
                         solidHeader = TRUE, collapsible = TRUE,
                         downloadButton("dyna_down_curve", "Survivor curve"),
                         downloadButton("dyna_down_residuals", "Residual table")
-                    )
+                    )# ,
+                    # box(title = "Export as FSK", status = "danger", solidHeader = TRUE, collapsible = TRUE,
+                    #     tabsetPanel(
+                    #         tabPanel("General Information",
+                    #                  textInput("fsk_dyna_name", "Name"),
+                    #                  textInput("fsk_dyna_source", "Source"),
+                    #                  textInput("fsk_dyna_identifier", "Identifier"),
+                    #                  dateInput("fsk_dyna_date", "Creation Date"),
+                    #                  textInput("fsk_dyna_rights", "Rights", value = "Creative Commons Attribution-NonCommercial 4.0"),
+                    #                  textInput("fsk_dyna_language", "Language", value = "English"),
+                    #                  tags$h4("Creators")
+                    #         ),
+                    #         tabPanel("Scope",
+                    #                  textInput("fsk_dyna_productName", "Product unit"),
+                    #                  textInput("fsk_dyna_hazardName", "Hazard name"),
+                    #                  textInput("fsk_dyna_hazardDescript", "Hazard description"),
+                    #                  textInput("fsk_dyna_hazardType", "Hazard type")
+                    #         ),
+                    #         tabPanel("Data background",
+                    #                  textInput("fsk_dyna_title", "Study title"),
+                    #                  textInput("fsk_dyna_descrtiption", "Study Description")
+                    #         ),
+                    #         tabPanel("Model math"),
+                    #         tabPanel("Export",
+                    #                  textInput("fsk_dyna_filename", "File name", value = "pred_from_bioinactivation.fskx"),
+                    #                  downloadButton("fsk_dyna_download", "Download")
+                    #         )
+                    #     )
+                    # )
                 ),
                 fluidRow(
                     tableFileUI("interv_temp_input", label_2 = "temperature",
@@ -272,7 +402,7 @@ of Applied Mathematics and Food Microbiology of the Technical University of Cart
                                    implemented in the bionactivation package of R (a.k.a. bioinactivation core)."),
                 tags$p("A link to the latest version of this application can be found in the following
                                    webpage:"),
-                tags$p("https://TBD//"),
+                tags$p("https://foodlab-upct.shinyapps.io/bioinactivationFE/"),
                 tags$hr(),
                 tags$p("For bug reports and support, please use one of the following e-mail accounts:"),
                 tags$p("garre.alberto@gmail.com"),

@@ -7,6 +7,9 @@ library(shiny)
 library(shinydashboard)
 library("shinyIncubator")
 library(shinyBS)
+library(rhandsontable)
+
+library(DT)
 
 source("tableFileUI.R")
 source("predParsInput.R")
