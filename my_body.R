@@ -242,40 +242,45 @@ body <- dashboardBody(
                     )
                 ),
                 fluidRow(
-                    box(title = "Model parameters", width = 12, status = "primary",
-                        collapsible = TRUE, solidHeader = TRUE,
-                        fitParsInput("dyna_model_pars")
-                        )
+                    dynamicModelUI("dyna_model_pars")
                     
                 ),
-                fluidRow(
-                    box(title = "Settings of the fitting algorithm", status = "primary",
-                        solidHeader = TRUE, collapsible = TRUE,
-                        selectInput("dyna_algorithm", "Fitting algorithm",
-                                    list(`Non-linear regression` = "nlr",
-                                         `Adaptive Monte Carlo` = "MCMC",
-                                         `Bayesian Monte Carlo` = "bayesian")
-                                    ),
-                        conditionalPanel(
-                            condition = "input.dyna_algorithm != 'nlr'",
-                            numericInput("dyna_niters", "Number of iterations",
-                                         1000, min = 0),
-                            actionButton("btn_dyna_seed", "Reset Seed")
-                        ),
-                        # conditionalPanel(
-                        #     condition = "input.dyna_algorithm == 'bayesian'",
-                        #     numericInput("dyna_niters", "Number of iterations",
-                        #                  1000, min = 0),
-                        #     actionButton("btn_dyna_seed", "Reset Seed")
-                        # ),
-                        tags$hr(),
-                        actionButton("dyna_fit_button", "Fit the model")
-                        ),
-                    box(title = "Initial guess", status = "primary",
-                        collapsible = TRUE, solidHeader = TRUE,
-                        plotOutput("dyna_plot_guess")
-                        )
-                ),
+                # dynamicModel("dyna_model_pars"),
+                # fluidRow(
+                #     box(title = "Model parameters", width = 12, status = "primary",
+                #         collapsible = TRUE, solidHeader = TRUE,
+                #         fitParsInput("dyna_model_pars")
+                #         )
+                # 
+                # ),
+                # fluidRow(
+                #     box(title = "Settings of the fitting algorithm", status = "primary",
+                #         solidHeader = TRUE, collapsible = TRUE,
+                #         selectInput("dyna_algorithm", "Fitting algorithm",
+                #                     list(`Non-linear regression` = "nlr",
+                #                          `Adaptive Monte Carlo` = "MCMC",
+                #                          `Bayesian Monte Carlo` = "bayesian")
+                #                     ),
+                #         conditionalPanel(
+                #             condition = "input.dyna_algorithm != 'nlr'",
+                #             numericInput("dyna_niters", "Number of iterations",
+                #                          1000, min = 0),
+                #             actionButton("btn_dyna_seed", "Reset Seed")
+                #         ),
+                #         # conditionalPanel(
+                #         #     condition = "input.dyna_algorithm == 'bayesian'",
+                #         #     numericInput("dyna_niters", "Number of iterations",
+                #         #                  1000, min = 0),
+                #         #     actionButton("btn_dyna_seed", "Reset Seed")
+                #         # ),
+                #         tags$hr(),
+                #         actionButton("dyna_fit_button", "Fit the model")
+                #         ),
+                #     box(title = "Initial guess", status = "primary",
+                #         collapsible = TRUE, solidHeader = TRUE,
+                #         plotOutput("dyna_plot_guess")
+                #         )
+                # ),
                 fluidRow(
                     box(title = "Fitted curve", status = "success",
                         solidHeader = TRUE, collapsible = TRUE,

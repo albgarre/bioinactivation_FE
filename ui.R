@@ -16,6 +16,7 @@ source("predParsInput.R")
 source("fitParsInput.R")
 source("tableFile3colUI.R")
 source("isofitParsInput.R")
+source("dynamicModelUI.R")
 
 ## Header
 

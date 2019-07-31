@@ -18,6 +18,7 @@ source("predParsInput.R")
 source("fitPars.R")
 source("tableFile3col.R")
 source("isofitPars.R")
+source("dynamicModel.R")
 
 ## Global variables
 
@@ -326,38 +327,40 @@ shinyServer(function(input, output, session) {
     dyna_temp_profile <- callModule(tableFile, "dyna_temp_input", 
                                     label_2 = "temperature")
     dyna_micro_data <- callModule(tableFile, "dyna_micro_data")
-    dyna_model_pars <- callModule(fitPars, "dyna_model_pars")
+    # dyna_model_pars <- callModule(fitPars, "dyna_model_pars")
+    dyna_model_pars <- callModule(dynamicModel, "dyna_model_pars", 
+                                  dyna_temp_profile = dyna_temp_profile, dyna_micro_data = dyna_micro_data)
     
-    #' Plot of the guesses
+    #' Plot of the guesses  (on a module now)
     
-    output$dyna_plot_guess <- renderPlot({
-        
-        validate({
-            need(dyna_temp_profile(), "Define a temperature profile")
-        })
-        
-        my_temperature <- as.data.frame(dyna_temp_profile()) %>% na.omit()
-        
-        times <- seq(0, max(my_temperature$time), length = 200)
-        
-        my_model <- dyna_model_pars()$model
-        
-        my_data <- dyna_micro_data() %>%
-            mutate(logN = log10(N))
-        
-        model_pars <- list(guess = c(dyna_model_pars()$guess, dyna_model_pars()$known),
-                           lower = c(dyna_model_pars()$lower, dyna_model_pars()$known),
-                           upper = c(dyna_model_pars()$upper, dyna_model_pars()$known))
-        
-        model_pars %>%
-            map(~ predict_inactivation(my_model, times, ., my_temperature)) %>%
-            map(~ .$simulation) %>%
-            imap_dfr(~ mutate(.x, which = .y)) %>%
-            ggplot(.) +
-                geom_line(aes(x = time, y = logN, colour = which)) +
-                geom_point(aes(x = time, y = logN), data = my_data)
-        
-        })
+    # output$dyna_plot_guess <- renderPlot({
+    #     
+    #     validate({
+    #         need(dyna_temp_profile(), "Define a temperature profile")
+    #     })
+    #     
+    #     my_temperature <- as.data.frame(dyna_temp_profile()) %>% na.omit()
+    #     
+    #     times <- seq(0, max(my_temperature$time), length = 200)
+    #     
+    #     my_model <- dyna_model_pars()$model
+    #     
+    #     my_data <- dyna_micro_data() %>%
+    #         mutate(logN = log10(N))
+    #     
+    #     model_pars <- list(guess = c(dyna_model_pars()$guess, dyna_model_pars()$known),
+    #                        lower = c(dyna_model_pars()$lower, dyna_model_pars()$known),
+    #                        upper = c(dyna_model_pars()$upper, dyna_model_pars()$known))
+    #     
+    #     model_pars %>%
+    #         map(~ predict_inactivation(my_model, times, ., my_temperature)) %>%
+    #         map(~ .$simulation) %>%
+    #         imap_dfr(~ mutate(.x, which = .y)) %>%
+    #         ggplot(.) +
+    #             geom_line(aes(x = time, y = logN, colour = which)) +
+    #             geom_point(aes(x = time, y = logN), data = my_data)
+    #     
+    #     })
     
     #' Model fitting
     
