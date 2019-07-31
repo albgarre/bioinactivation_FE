@@ -11,6 +11,8 @@ library(bioinactivation)
 
 library(FME)
 
+library(mvtnorm)
+
 source("tableFileUI.R")
 source("tableFile.R")
 source("predPars.R")
@@ -328,7 +330,7 @@ shinyServer(function(input, output, session) {
                                     label_2 = "temperature")
     dyna_micro_data <- callModule(tableFile, "dyna_micro_data")
     # dyna_model_pars <- callModule(fitPars, "dyna_model_pars")
-    dyna_model_pars <- callModule(dynamicModel, "dyna_model_pars", 
+    dyna_model_fit <- callModule(dynamicModel, "dyna_model_pars", 
                                   dyna_temp_profile = dyna_temp_profile, dyna_micro_data = dyna_micro_data)
     
     #' Plot of the guesses  (on a module now)
@@ -364,82 +366,82 @@ shinyServer(function(input, output, session) {
     
     #' Model fitting
     
-    dyna_model_fit <- eventReactive(input$dyna_fit_button, {
-        
-        my_temperature <- as.data.frame(dyna_temp_profile()) %>% na.omit()
-
-        my_model <- dyna_model_pars()$model
-        
-        my_data <- dyna_micro_data() %>%
-            mutate(logN = log10(N))
-        
-        withProgress(message = "Fitting model", {
-            
-            if (input$dyna_algorithm == "nlr") {
-                
-                fit_dynamic_inactivation(my_data, my_model, my_temperature,
-                                         dyna_model_pars()$guess, 
-                                         dyna_model_pars()$upper, 
-                                         dyna_model_pars()$lower,
-                                         dyna_model_pars()$known)
-            } else {
-                fit_inactivation_MCMC(my_data, my_model, my_temperature,
-                                      dyna_model_pars()$guess, 
-                                      dyna_model_pars()$upper, 
-                                      dyna_model_pars()$lower,
-                                      dyna_model_pars()$known,
-                                      niter = input$dyna_niters)
-            }
-        })
-    })
+    # dyna_model_fit <- eventReactive(input$dyna_fit_button, {  # In the module now
+    #     
+    #     my_temperature <- as.data.frame(dyna_temp_profile()) %>% na.omit()
+    # 
+    #     my_model <- dyna_model_pars()$model
+    #     
+    #     my_data <- dyna_micro_data() %>%
+    #         mutate(logN = log10(N))
+    #     
+    #     withProgress(message = "Fitting model", {
+    #         
+    #         if (input$dyna_algorithm == "nlr") {
+    #             
+    #             fit_dynamic_inactivation(my_data, my_model, my_temperature,
+    #                                      dyna_model_pars()$guess, 
+    #                                      dyna_model_pars()$upper, 
+    #                                      dyna_model_pars()$lower,
+    #                                      dyna_model_pars()$known)
+    #         } else {
+    #             fit_inactivation_MCMC(my_data, my_model, my_temperature,
+    #                                   dyna_model_pars()$guess, 
+    #                                   dyna_model_pars()$upper, 
+    #                                   dyna_model_pars()$lower,
+    #                                   dyna_model_pars()$known,
+    #                                   niter = input$dyna_niters)
+    #         }
+    #     })
+    # })
     
     dyna_modCost <- reactive({
-        
+
         validate(need(dyna_model_fit(), message = FALSE))
-        
+
         my_simulation <- dyna_model_fit() %>%
             .$best_prediction %>%
             .$simulation %>%
             select(time, logN)
-        
+
         my_data <- dyna_micro_data() %>%
             mutate(logN = log10(N)) %>%
             select(time, logN)
-        
+
         modCost(model = my_simulation,
                 obs = my_data)
     })
-    
+
     #' Plot of the fit
-    
+
     output$dyna_plot_fit <- renderPlot({
-        
+
         validate(need(dyna_model_fit(), message = FALSE))
-        
+
         plot(dyna_model_fit(), plot_temp = input$dyna_addTemp,
              label_y1 = input$dyna_ylabel,
              label_y2 = input$dyna_ylabel2,
              ylims = c(input$dyna_ymin, input$dyna_ymax)) +
              xlab(input$dyna_xlabel)
-        
+
     })
     
     #' Model parameters and indexes of the fit
     
     output$dyna_fitted_pars <- renderTable({
-        
+
         validate(need(dyna_model_fit(), message = FALSE))
-        
+
         if (is.FitInactivation(dyna_model_fit()) ) {
             summary_dynamic_fit(dyna_model_fit())
         } else {
             summary_MCMC_fit(dyna_model_fit())
         }
-        
+
     })
 
-    output$dyna_residuals_statistics <- renderTable({ 
-        
+    output$dyna_residuals_statistics <- renderTable({
+
         residuals <- dyna_modCost()$residuals$res
 
         if (is.FitInactivation(dyna_model_fit())) {
@@ -458,73 +460,73 @@ shinyServer(function(input, output, session) {
             mutate(AICc = AIC + 2*n_pars*(n_pars + 1)/(n_obs - n_pars - 1),
                    BIC = log(n_obs)*n_pars - 2*loglik) %>%
             mutate(Af = 10^RMSE, Bf = 10^ME)
-        
+
         out
     })
     
     #' Diagnostics
     
-    output$dyna_residuals_plot <- renderPlot({
-        
-        dyna_modCost() %>%
-            .$residuals %>%
-            as.data.frame() %>%
-            ggplot() +
-                geom_point(aes(x = x, y = res)) +
-                xlab("Time") + ylab("Residuals") +
-                geom_hline(yintercept = 0, linetype = 2, size = 1)
-    })
-    
-    output$dyna_MCMC_pairs <- renderPlot({
-        
-        validate(need(dyna_model_fit(), message = FALSE))
-        
-        if (is.FitInactivationMCMC(dyna_model_fit())) {
-            pairs(dyna_model_fit()$modMCMC)
-            
-        } else {
-            NULL
-        }
-    })
-    
-    output$dyna_par_cor <- renderTable({
-        
-        validate(need(dyna_model_fit(), message = FALSE))
-        
-        if (is.FitInactivation(dyna_model_fit())) {
-            cov2cor(summary(dyna_model_fit())$cov.unscaled)
-            
-        } else {
-            NULL
-        }
-        
-    })
-    
-    output$dyna_MCMC_conv_plot <- renderPlot({
-        
-        validate(need(dyna_model_fit(), message = FALSE))
-        
-        if (is.FitInactivationMCMC(dyna_model_fit())) {
-            plot(dyna_model_fit()$modMCMC)
-            
-        } else {
-            NULL
-        }
-    })
-    
-    output$dyna_residuals_normality <- renderText({
-        
-        test_results <- shapiro.test(dyna_modCost()$residuals$res)
-        
-        if (test_results$p.value < 0.05) {
-            paste0("There is enough statistical signifficante to state that residuals are not normal, p-value: ", 
-                   round(test_results$p.value, 3))
-        } else {
-            paste0("There is NOT enough statistical signifficante to state that residuals are not normal, p-value: ", 
-                   round(test_results$p.value, 3))
-        }
-        
-    })
+    # output$dyna_residuals_plot <- renderPlot({
+    # 
+    #     dyna_modCost() %>%
+    #         .$residuals %>%
+    #         as.data.frame() %>%
+    #         ggplot() +
+    #             geom_point(aes(x = x, y = res)) +
+    #             xlab("Time") + ylab("Residuals") +
+    #             geom_hline(yintercept = 0, linetype = 2, size = 1)
+    # })
+    # 
+    # output$dyna_MCMC_pairs <- renderPlot({
+    # 
+    #     validate(need(dyna_model_fit(), message = FALSE))
+    # 
+    #     if (is.FitInactivationMCMC(dyna_model_fit())) {
+    #         pairs(dyna_model_fit()$modMCMC)
+    # 
+    #     } else {
+    #         NULL
+    #     }
+    # })
+    # 
+    # output$dyna_par_cor <- renderTable({
+    # 
+    #     validate(need(dyna_model_fit(), message = FALSE))
+    # 
+    #     if (is.FitInactivation(dyna_model_fit())) {
+    #         cov2cor(summary(dyna_model_fit())$cov.unscaled)
+    # 
+    #     } else {
+    #         NULL
+    #     }
+    # 
+    # })
+    # 
+    # output$dyna_MCMC_conv_plot <- renderPlot({
+    # 
+    #     validate(need(dyna_model_fit(), message = FALSE))
+    # 
+    #     if (is.FitInactivationMCMC(dyna_model_fit())) {
+    #         plot(dyna_model_fit()$modMCMC)
+    # 
+    #     } else {
+    #         NULL
+    #     }
+    # })
+    # 
+    # output$dyna_residuals_normality <- renderText({
+    # 
+    #     test_results <- shapiro.test(dyna_modCost()$residuals$res)
+    # 
+    #     if (test_results$p.value < 0.05) {
+    #         paste0("There is enough statistical signifficante to state that residuals are not normal, p-value: ",
+    #                round(test_results$p.value, 3))
+    #     } else {
+    #         paste0("There is NOT enough statistical signifficante to state that residuals are not normal, p-value: ",
+    #                round(test_results$p.value, 3))
+    #     }
+    # 
+    # })
     
     #' Results download
     
@@ -535,12 +537,12 @@ shinyServer(function(input, output, session) {
                       file = file, row.names = FALSE)
         }
     )
-    
+
     output$dyna_down_residuals <- downloadHandler(
         filename = "residual-table.csv",
         content = function(file) {
             dyna_modCost()$residuals %>%
-                select(Oberved = obs, Predicted = mod, 
+                select(Oberved = obs, Predicted = mod,
                        Residual = res) %>%
                 write.csv(., file = file,
                           row.names = FALSE)
