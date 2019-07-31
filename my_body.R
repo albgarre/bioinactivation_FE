@@ -310,18 +310,19 @@ body <- dashboardBody(
                         plotOutput("dyna_residuals_plot"),
                         tags$h3("Shapiro-Wilk normality test of the residuals"),
                         verbatimTextOutput("dyna_residuals_normality"),
-                        conditionalPanel(
-                            condition = "input.dyna_algorithm == 'nlr'",
-                            tags$h3("Parameter correlation"),
-                            tableOutput("dyna_par_cor")
-                        ),
-                        conditionalPanel(
-                            condition = "input.dyna_algorithm == 'MCMC'",
-                            tags$h3("Pairs plot"),
-                            plotOutput("dyna_MCMC_pairs"),
-                            tags$h3("Convergence of the Markov chain"),
-                            plotOutput("dyna_MCMC_conv_plot")
-                        )
+                        plotOutput("dyna_fit_diagnostic")
+                        # conditionalPanel(
+                        #     condition = "input.dyna_algorithm == 'nlr'",
+                        #     tags$h3("Parameter correlation"),
+                        #     tableOutput("dyna_par_cor")
+                        # ),
+                        # conditionalPanel(
+                        #     condition = "input.dyna_algorithm == 'MCMC'",
+                        #     tags$h3("Pairs plot"),
+                        #     plotOutput("dyna_MCMC_pairs"),
+                        #     tags$h3("Convergence of the Markov chain"),
+                        #     plotOutput("dyna_MCMC_conv_plot")
+                        # )
 
                         )
                 ),

@@ -11,7 +11,10 @@ library(bioinactivation)
 
 library(FME)
 
+library(GGally)
+library(zoo)
 library(mvtnorm)
+library(cowplot)
 
 source("tableFileUI.R")
 source("tableFile.R")
@@ -21,6 +24,8 @@ source("fitPars.R")
 source("tableFile3col.R")
 source("isofitPars.R")
 source("dynamicModel.R")
+
+theme_set(theme_grey())
 
 ## Global variables
 
@@ -466,16 +471,48 @@ shinyServer(function(input, output, session) {
     
     #' Diagnostics
     
-    # output$dyna_residuals_plot <- renderPlot({
-    # 
-    #     dyna_modCost() %>%
-    #         .$residuals %>%
-    #         as.data.frame() %>%
-    #         ggplot() +
-    #             geom_point(aes(x = x, y = res)) +
-    #             xlab("Time") + ylab("Residuals") +
-    #             geom_hline(yintercept = 0, linetype = 2, size = 1)
-    # })
+    output$dyna_residuals_plot <- renderPlot({
+
+        dyna_modCost() %>%
+            .$residuals %>%
+            as.data.frame() %>%
+            ggplot() +
+                geom_point(aes(x = x, y = res)) +
+                xlab("Time") + ylab("Residuals") +
+                geom_hline(yintercept = 0, linetype = 2, size = 1)
+    })
+    
+    output$dyna_fit_diagnostic <- renderPlot({
+        
+        if("FitInactivationMCMC" %in% class(dyna_model_fit())) {
+            
+            p1 <- dyna_model_fit()$modMCMC$pars %>%
+                as.data.frame() %>%
+                mutate(iter = row_number()) %>%
+                gather(par, value, -iter) %>%
+                # split(.$par) %>%
+                # map(.,
+                #     ~ mutate(., rmean = rollmeanr(value, 7, na.pad = TRUE))
+                #     )
+                ggplot(aes(x = iter, y = value)) +
+                geom_line() +
+                geom_line(aes(y = rollmeanr(value, 10, na.pad = TRUE)), colour = "grey", size = 1) +
+                # geom_smooth(se = FALSE, method = "rlm") +
+                facet_wrap("par", scales = "free") +
+                theme_minimal() +
+                ylab("")
+            
+            p2 <- dyna_model_fit()$modMCMC$pars %>%
+                as.data.frame() %>%
+                ggpairs()
+            
+            plot_grid(p1, ggmatrix_gtable(p2), ncol = 1)
+            
+        } else {
+            NULL
+        }
+        
+    })
     # 
     # output$dyna_MCMC_pairs <- renderPlot({
     # 
@@ -514,19 +551,19 @@ shinyServer(function(input, output, session) {
     #     }
     # })
     # 
-    # output$dyna_residuals_normality <- renderText({
-    # 
-    #     test_results <- shapiro.test(dyna_modCost()$residuals$res)
-    # 
-    #     if (test_results$p.value < 0.05) {
-    #         paste0("There is enough statistical signifficante to state that residuals are not normal, p-value: ",
-    #                round(test_results$p.value, 3))
-    #     } else {
-    #         paste0("There is NOT enough statistical signifficante to state that residuals are not normal, p-value: ",
-    #                round(test_results$p.value, 3))
-    #     }
-    # 
-    # })
+    output$dyna_residuals_normality <- renderText({
+
+        test_results <- shapiro.test(dyna_modCost()$residuals$res)
+
+        if (test_results$p.value < 0.05) {
+            paste0("There is enough statistical signifficante to state that residuals are not normal, p-value: ",
+                   round(test_results$p.value, 3))
+        } else {
+            paste0("There is NOT enough statistical signifficante to state that residuals are not normal, p-value: ",
+                   round(test_results$p.value, 3))
+        }
+
+    })
     
     #' Results download
     
