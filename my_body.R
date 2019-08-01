@@ -51,7 +51,10 @@ body <- dashboardBody(
                         textInput("pred_ylabel2", "Secondary y-label", value = "Temperature"),
                         numericInput("pred_ymin", "Lower limit y-axis", value = 0),
                         numericInput("pred_ymax", "Upper limit y-axis", value = 6),
-                        checkboxInput("pred_addTemp", "Temperature profile", TRUE)
+                        checkboxInput("pred_addTemp", "Temperature profile", TRUE),
+                        tags$hr(),
+                        checkboxInput("pred_add_time_to_X", "Include time to reach X log-reductions", FALSE),
+                        numericInput("pred_tgr_logreductions", "Number of log-reductions", value = 3, min = 0)
                         )
                     
                 ),

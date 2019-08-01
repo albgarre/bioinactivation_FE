@@ -145,8 +145,29 @@ shinyServer(function(input, output, session) {
         micro_data <- as.data.frame(pred_micro_data()) %>%
             mutate(logN = log10(N))
         
-        p + geom_point(aes(x = time, y = logN), data = micro_data) # +
+        p <- p + geom_point(aes(x = time, y = logN), data = micro_data) # +
             # ylim(input$pred_ymin, input$pred_ymax)
+        
+        if (input$pred_add_time_to_X) {
+            
+            logN0 <- pred_simulation()$simulation$logN[1]
+            t_D <- time_to_logreduction(input$pred_tgr_logreductions, pred_simulation())
+            
+            print(logN0)
+            print(t_D)
+            
+            if (!is.na(t_D)) {
+                
+                p <- p + 
+                    geom_hline(yintercept = logN0 - input$pred_tgr_logreductions, linetype = 3) +
+                    geom_vline(xintercept = t_D, linetype = 3) +
+                    geom_label(x = t_D, y = logN0, label = paste("Time =", round(t_D, 2)))
+                
+            }
+            
+        }
+        
+        p
 
     })
     
