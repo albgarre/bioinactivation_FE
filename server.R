@@ -465,6 +465,38 @@ shinyServer(function(input, output, session) {
         }
 
     })
+    
+    output$dyna_shoulder_geeraerd <- renderUI({
+        
+        
+        validate(need(dyna_model_fit(), message = FALSE))
+        
+        if (dyna_model_fit()$best_prediction$model != "Geeraerd") {
+            
+            return(NULL)
+        } else {
+            
+            my_fit <- dyna_model_fit()
+            
+            if (is.FitInactivation(my_fit)) {
+                
+                kmax <- log(10)/my_fit$fit_results$par[["D_R"]]
+                SL <- log(my_fit$fit_results$par["C_c0"] + 1)/kmax
+                
+            } else {
+                
+                kmax <- log(10)/my_fit$modMCMC$bestpar[["D_R"]]
+                SL <- log(my_fit$modMCMC$bestpar["C_c0"] + 1)/kmax
+            }
+
+            tagList(
+                wellPanel(
+                    tags$p(paste("Shoulder length at reference temperature:", round(SL, 2)))
+                )
+            )
+        }
+
+    })
 
     output$dyna_residuals_statistics <- renderTable({
 

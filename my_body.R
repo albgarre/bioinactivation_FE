@@ -304,6 +304,7 @@ body <- dashboardBody(
                     box(title = "Fitted parameters", status = "warning",
                         solidHeader = TRUE, collapsible = TRUE,
                         tableOutput("dyna_fitted_pars"),
+                        uiOutput("dyna_shoulder_geeraerd"),
                         tags$hr(),
                         tableOutput("dyna_residuals_statistics")
                     ),
