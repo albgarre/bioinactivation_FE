@@ -423,19 +423,11 @@ of Applied Mathematics and Food Microbiology of the Technical University of Cart
                                     Bioinactivation: Software for modelling dynamic microbial inactivation,
                                     Food Research International, Volume 93, March 2017, Pages 66-74, ISSN 0963-9969,
                                     http://dx.doi.org/10.1016/j.foodres.2017.01.012."),
-                tags$p("A BibTeX entry for LaTeX users is"),
-                tags$p("@Article{,
-                                   author = {Alberto Garre and Pablo S. Fernandez and Roland Lindqvist and Jose A. Egea},
-                                   title = {Bioinactivation: Software for modelling dynamic microbial inactivation },
-                                   journal = {Food Research International },
-                                   volume = {93},
-                                   pages = {66 - 74},
-                                   year = {2017},
-                                   issn = {0963-9969},
-                                   doi = {10.1016/j.foodres.2017.01.012},
-                                   url = {//www.sciencedirect.com/science/article/pii/S0963996917300200},
-                                   }"
-                )
+                tags$p("and/or"),
+                tags$p("Garre, A., Clemente-Carazo, M., Fernandez, P. S., Lindqvist, R., & Egea, J. A. (2018).
+                       Bioinactivation FE: A free web application for modelling isothermal and dynamic microbial inactivation. 
+                       Food Research International, 112, 353–360. https://doi.org/10.1016/j.foodres.2018.06.057")
+                
                 ),
         
         ## Articles tab
