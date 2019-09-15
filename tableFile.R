@@ -44,8 +44,10 @@ tableFile <- function(input, output, session,
             input_manual()
         } else if (input$my_tabBox == "Text") {
             file_frame()
-        } else {
+        } else if (input$my_tabBox == "Excel"){
             excel_frame()
+        } else {
+            hot_to_r(input$hot)
         }
     }, ignoreInit = FALSE, ignoreNULL = FALSE)
 
@@ -63,6 +65,21 @@ tableFile <- function(input, output, session,
         
         p
         
+    })
+    
+    ## Handsontable
+    
+    output$hot = renderRHandsontable({
+        if (!is.null(input$hot)) {
+            DF = hot_to_r(input$hot)
+        } else {
+            DF = data.frame(x = c(1, 2), y = c(3, 4))
+        }
+        
+        DF %>%
+            set_names(c(label_1, label_2)) %>%
+            rhandsontable() %>%
+                hot_table(highlightCol = TRUE, highlightRow = TRUE)
     })
     
     ## Export the table

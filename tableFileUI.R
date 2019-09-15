@@ -31,6 +31,9 @@ tableFileUI <- function(id, inputBoxTitle = "Input", outputBoxTitle = "Output",
                             fileInput(ns("excel_file"), "Excel file"),
                             textInput(ns("excel_sheet"), "Sheet name", "Sheet1"),
                             numericInput(ns("excel_skip"), "Skip", 0)
+                            ),
+                   tabPanel("Handsome",
+                            rHandsontableOutput(ns("hot"))
                             )
                    ),
             
