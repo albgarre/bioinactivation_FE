@@ -5,7 +5,7 @@ tableFile3col <- function(input, output, session,
     ## File part
     
     userFile <- reactive({
-        validate(need(input$file, label = "File"))
+        validate(need(input$file, label = "Text"))
         input$file
     })
     
@@ -15,6 +15,17 @@ tableFile3col <- function(input, output, session,
                    sep = input$sep,
                    dec = input$dec,
                    stringsAsFactors = FALSE)
+    })
+    
+    excelFile <- reactive({
+        validate(need(input$excel_file, label = "Excel"))
+        input$excel_file
+    })
+    
+    excel_frame <- reactive({
+        read_excel(excelFile()$datapath,
+                   sheet = input$excel_sheet,
+                   skip = input$excel_skip)
     })
     
     ## Matrix part
@@ -31,8 +42,10 @@ tableFile3col <- function(input, output, session,
         
         if (input$my_tabBox == "Manual") {
             input_manual()
-        } else {
+        } else if(input$my_tabBox == "Text") {
             file_frame()
+        } else {
+            excel_frame()
         }
     }, ignoreInit = FALSE, ignoreNULL = FALSE)
 

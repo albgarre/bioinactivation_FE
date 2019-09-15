@@ -23,12 +23,17 @@ tableFile3colUI <- function(id, inputBoxTitle = "Input", outputBoxTitle = "Outpu
                                         data = default_frame)
                    ),
                    
-                   tabPanel("File",
+                   tabPanel("Text",
                             fileInput(ns("file"), csvlabel),
                             radioButtons(ns("sep"), "Separator",
                                          c(Comma = ",", Semicolon = ";", Tab = "\t"), "\t"),
                             radioButtons(ns("dec"), "Decimal Point",
                                          c(Point = ".", Comma = ","), ".")
+                   ),
+                   tabPanel("Excel",
+                            fileInput(ns("excel_file"), "Excel file"),
+                            textInput(ns("excel_sheet"), "Sheet name", "Sheet1"),
+                            numericInput(ns("excel_skip"), "Skip", 0)
                    )
             ),
             

@@ -20,12 +20,17 @@ tableFileUI <- function(id, inputBoxTitle = "Input", outputBoxTitle = "Output",
                                         data = default_frame)
                             ),
                    
-                   tabPanel("File",
+                   tabPanel("Text",
                             fileInput(ns("file"), csvlabel),
                             radioButtons(ns("sep"), "Separator",
                                          c(Comma = ",", Semicolon = ";", Tab = "\t"), "\t"),
                             radioButtons(ns("dec"), "Decimal Point",
                                          c(Point = ".", Comma = ","), ".")
+                            ),
+                   tabPanel("Excel",
+                            fileInput(ns("excel_file"), "Excel file"),
+                            textInput(ns("excel_sheet"), "Sheet name", "Sheet1"),
+                            numericInput(ns("excel_skip"), "Skip", 0)
                             )
                    ),
             
@@ -37,7 +42,6 @@ tableFileUI <- function(id, inputBoxTitle = "Input", outputBoxTitle = "Output",
                 plotOutput(ns("my_plot")),
                 tags$hr(),
                 downloadLink(ns("export_table"), "Export")
-                # actionLink(ns("export_table"), "Export")
                 )
             
         )
