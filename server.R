@@ -25,6 +25,11 @@ source("tableFile3col.R")
 source("isofitPars.R")
 source("dynamicModel.R")
 
+# library(FSK2R)
+library(readxl)
+
+##
+
 theme_set(theme_grey())
 
 ## Global variables
@@ -53,7 +58,7 @@ shinyServer(function(input, output, session) {
     
     ## Popup message
     
-    toggleModal(session, "startupModal", toggle = "open")
+    # toggleModal(session, "startupModal", toggle = "open")
     
     ## Header
     
@@ -66,6 +71,21 @@ shinyServer(function(input, output, session) {
     # })
     
     ## FSK2R
+    
+    output$fsk_pred_download <- downloadHandler(filename = function() {
+        paste("output", "zip", sep=".")
+    },
+    content = function(con) {
+        
+        my_fsk <- create_fsk(r_model = "model.r",
+                             r_visualization = "visualization.r")
+        
+        my_fsk <- read_fsk_metadata_excel(my_fsk, "template_predictions.xlsx")
+        export_fsk(my_fsk, con)
+        
+    },
+    contentType = "application/zip"
+    )
     
     output$fsk_pred_creators <- renderRHandsontable({
         rhandsontable(data.frame(Email = c("google@chucknorris.com", NA), `Family name` = c("Doe", NA), `Given Name` = c("Jon", NA)),
@@ -189,9 +209,28 @@ shinyServer(function(input, output, session) {
     
     output$pred_residuals <- renderTable(
         pred_residuals()$residuals %>%
-            select(Oberved = obs, Predicted = mod, 
+            select(Observed = obs, Predicted = mod, 
                    Residual = res)
     )
+    
+    output$pred_plot_pred <- renderPlot({
+        pred_residuals()$residuals %>%
+            select(Observed = obs, Predicted = mod, 
+                   Residual = res) %>%
+            ggplot() +
+                geom_point(aes(x = Observed, y = Predicted)) +
+                geom_abline(slope = 1, intercept = 0, linetype = 2)
+    })
+    
+    output$pred_plot_res <- renderPlot({
+        pred_residuals()$residuals %>%
+            select(Observed = obs, Predicted = mod, 
+                   Residual = res) %>%
+            ggplot() +
+            geom_point(aes(x = Predicted, y = Residual)) +
+            geom_hline(yintercept = 0, linetype = 2)
+        
+    })
     
     output$pred_residual_statistics <- renderTable({ 
         
