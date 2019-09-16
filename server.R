@@ -130,8 +130,17 @@ shinyServer(function(input, output, session) {
     
     #' Data input
     
-    pred_temp_profile <- callModule(tableFile, "pred_temp_input", label_2 = "temperature")
-    pred_micro_data <- callModule(tableFile, "pred_micro_data")
+    pred_temp_profile <- callModule(tableFile, "pred_temp_input", 
+                                    label_2 = "temperature", 
+                                    default_data = data.frame(c(0, 10), c(70, 80))
+                                    )
+    
+    pred_micro_data <- callModule(tableFile, "pred_micro_data",
+                                  default_data = data.frame(c(0, 5, 7.5, 2.5, 6, 8),
+                                                            c(1e6, 1e5, 15000, 800000, 30000, 1e3)
+                                                            )
+                                  )
+    
     pred_model_pars <- callModule(predPars, "pred_pars")
     
     #' Make the simulations

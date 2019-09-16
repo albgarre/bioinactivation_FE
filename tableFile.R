@@ -1,6 +1,7 @@
 
 tableFile <- function(input, output, session,
-                      label_1 = "time", label_2 = "N") {
+                      label_1 = "time", label_2 = "N",
+                      default_data = data.frame(x = 1, y = 1)) {
     
     ## File part
     
@@ -73,7 +74,7 @@ tableFile <- function(input, output, session,
         if (!is.null(input$hot)) {
             DF = hot_to_r(input$hot)
         } else {
-            DF = data.frame(x = c(1, 2), y = c(3, 4))
+            DF = default_data
         }
         
         DF %>%
