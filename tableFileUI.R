@@ -13,13 +13,17 @@ tableFileUI <- function(id, inputBoxTitle = "Input", outputBoxTitle = "Output",
             ## Input
             
             tabBox(title = inputBoxTitle, id = ns("my_tabBox"), side = "right",
+                   selected = "Excel",
+                   
+                   # tabPanel("Old",
+                   #          matrixInput(inputId = ns("manual_table"),
+                   #                      label = paste(label_1, label_2, sep = " - "),
+                   #                      data = default_frame)
+                   #          ),
                    
                    tabPanel("Manual",
-                            matrixInput(inputId = ns("manual_table"),
-                                        label = paste(label_1, label_2, sep = " - "),
-                                        data = default_frame)
-                            ),
-                   
+                            rHandsontableOutput(ns("hot"))
+                   ),
                    tabPanel("Text",
                             fileInput(ns("file"), csvlabel),
                             radioButtons(ns("sep"), "Separator",
@@ -31,10 +35,8 @@ tableFileUI <- function(id, inputBoxTitle = "Input", outputBoxTitle = "Output",
                             fileInput(ns("excel_file"), "Excel file"),
                             textInput(ns("excel_sheet"), "Sheet name", "Sheet1"),
                             numericInput(ns("excel_skip"), "Skip", 0)
-                            ),
-                   tabPanel("Handsome",
-                            rHandsontableOutput(ns("hot"))
                             )
+                   
                    ),
             
             ## Output

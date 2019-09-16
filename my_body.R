@@ -163,14 +163,27 @@ body <- dashboardBody(
                         tableOutput("iso_pars_table"),
                         tableOutput("iso_residual_statistics")
                     ),
-                    box(title = "Residual analysis", status = "warning",
-                        solidHeader = TRUE, collapsible = TRUE,
-                        tags$h3("Residual plot"),
-                        plotOutput("iso_residual_plot"),
-                        tags$hr(),
-                        tags$h3("Shapiro-Wilk normality test of the residuals"),
-                        verbatimTextOutput("iso_residuals_normality")
-                        )
+                    tabBox(
+                        title = "Residuals", side = "right",
+                        tabPanel("Plot vs time",
+                                 plotOutput("iso_residual_plot")
+                        ),
+                        tabPanel("Histogram",
+                                 plotOutput("iso_residuals_hist")
+                        ),
+                        tabPanel("Statistics",
+                                 tags$h3("Shapiro-Wilk normality test of the residuals"),
+                                 verbatimTextOutput("iso_residuals_normality")
+                                 )
+                    )
+                    # box(title = "Residual analysis", status = "warning",
+                    #     solidHeader = TRUE, collapsible = TRUE,
+                    #     tags$h3("Residual plot"),
+                    #     plotOutput("iso_residual_plot"),
+                    #     tags$hr(),
+                        # tags$h3("Shapiro-Wilk normality test of the residuals"),
+                        # verbatimTextOutput("iso_residuals_normality")
+                    #     )
                 ),
                 fluidRow(
                     # box(title = "Export as FSK", status = "danger", solidHeader = TRUE, collapsible = TRUE,

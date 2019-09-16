@@ -26,7 +26,8 @@ tableFile <- function(input, output, session,
     excel_frame <- reactive({
         read_excel(excelFile()$datapath,
                    sheet = input$excel_sheet,
-                   skip = input$excel_skip)
+                   skip = input$excel_skip,
+                   col_types = "numeric")
     })
     
     ## Matrix part
@@ -41,7 +42,7 @@ tableFile <- function(input, output, session,
     
     out_table <- eventReactive(input$update_table, {
 
-        if (input$my_tabBox == "Manual") {
+        if (input$my_tabBox == "Old") {
             input_manual()
         } else if (input$my_tabBox == "Text") {
             file_frame()

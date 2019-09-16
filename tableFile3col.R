@@ -1,6 +1,8 @@
 
 tableFile3col <- function(input, output, session,
-                          label_1 = "time", label_2 = "logS", label_3 = "temperature") {
+                          label_1 = "time", label_2 = "logS", label_3 = "temperature",
+                          default_data = data.frame(x = 1, y = 1, z = 1)
+                          ) {
     
     ## File part
     
@@ -25,7 +27,8 @@ tableFile3col <- function(input, output, session,
     excel_frame <- reactive({
         read_excel(excelFile()$datapath,
                    sheet = input$excel_sheet,
-                   skip = input$excel_skip)
+                   skip = input$excel_skip,
+                   col_types = "numeric")
     })
     
     ## Matrix part
@@ -40,12 +43,14 @@ tableFile3col <- function(input, output, session,
     
     out_table <- eventReactive(input$update_table, {
         
-        if (input$my_tabBox == "Manual") {
+        if (input$my_tabBox == "Old") {
             input_manual()
-        } else if(input$my_tabBox == "Text") {
+        } else if (input$my_tabBox == "Text") {
             file_frame()
-        } else {
+        } else if (input$my_tabBox == "Excel"){
             excel_frame()
+        } else {
+            hot_to_r(input$hot)
         }
     }, ignoreInit = FALSE, ignoreNULL = FALSE)
 
@@ -69,6 +74,21 @@ tableFile3col <- function(input, output, session,
                         file = file, row.names = FALSE, sep = "\t")
         }
     )
+    
+    ## Handsontable
+    
+    output$hot = renderRHandsontable({
+        if (!is.null(input$hot)) {
+            DF = hot_to_r(input$hot)
+        } else {
+            DF = default_data
+        }
+        
+        DF %>%
+            set_names(c(label_1, label_2, label_3)) %>%
+            rhandsontable() %>%
+            hot_table(highlightCol = TRUE, highlightRow = TRUE)
+    })
     
     
     # Return the reactive that yields the data frame

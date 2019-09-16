@@ -16,12 +16,16 @@ tableFile3colUI <- function(id, inputBoxTitle = "Input", outputBoxTitle = "Outpu
             ## Input
             
             tabBox(title = inputBoxTitle, id = ns("my_tabBox"), side = "right",
+                   selected = "Excel",
+                   # tabPanel("Old",
+                   #          matrixInput(inputId = ns("manual_table"),
+                   #                      label = paste(label_1, label_2, label_3, sep = " - "),
+                   #                      data = default_frame)
+                   # ),
                    
                    tabPanel("Manual",
-                            matrixInput(inputId = ns("manual_table"),
-                                        label = paste(label_1, label_2, label_3, sep = " - "),
-                                        data = default_frame)
-                   ),
+                            rHandsontableOutput(ns("hot"))
+                            ),
                    
                    tabPanel("Text",
                             fileInput(ns("file"), csvlabel),

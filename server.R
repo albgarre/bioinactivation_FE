@@ -306,7 +306,12 @@ shinyServer(function(input, output, session) {
     
     #' Data input
     
-    iso_my_data <- callModule(tableFile3col, "iso_data_input")
+    iso_my_data <- callModule(tableFile3col, "iso_data_input",
+                              default_data = data.frame(time = c(0, 6, 8, 0, 6, 10, 0, 4, 8),
+                                                        logS = c(0, -1.7, -2, 0, -0.3, -1, 0, -0.7, -1.5),
+                                                        temperature = c(100, 100, 100, 95, 95, 95, 97, 97, 97)
+                                                        )
+                              )
     iso_par_guess <- callModule(isofitPars, "iso_model_pars")
     
     #' Model fit
@@ -369,9 +374,23 @@ shinyServer(function(input, output, session) {
             mutate(res = residuals(summary(iso_fitted_model()))) %>%
             mutate(temperature = factor(temp)) %>%
             ggplot() +
-                geom_point(aes(x = time, y = res, colour = temperature)) +
+                geom_point(aes(x = time, y = res)) + # , colour = temperature)) +
                 geom_hline(yintercept = 0, linetype = 2, size = 1) +
-                ylab("Residual") + xlab("Time")
+                ylab("Residual") + xlab("Time") +
+                facet_wrap("temperature", scales = "free_x")
+    })
+    
+    output$iso_residuals_hist <- renderPlot({
+        
+        iso_fitted_model() %>%
+            .$data %>%
+            mutate(res = residuals(summary(iso_fitted_model()))) %>%
+            mutate(temperature = factor(temp)) %>%
+            ggplot() +
+                geom_histogram(aes(res, fill = temperature)) +
+                geom_vline(xintercept = 0, linetype = 2, colour = "red") +
+                xlab("Residual")
+        
     })
     
     output$iso_residuals_normality <- renderText({
@@ -403,8 +422,13 @@ shinyServer(function(input, output, session) {
     #' Data input
     
     dyna_temp_profile <- callModule(tableFile, "dyna_temp_input", 
-                                    label_2 = "temperature")
-    dyna_micro_data <- callModule(tableFile, "dyna_micro_data")
+                                    label_2 = "temperature",
+                                    default_data = data.frame(c(0, 10), c(70, 80))
+                                    )
+    dyna_micro_data <- callModule(tableFile, "dyna_micro_data",
+                                  default_data = data.frame(c(0, 5, 7.5, 2.5, 6, 8),
+                                                            c(1e6, 1e5, 15000, 800000, 30000, 1e3))
+                                  )
     # dyna_model_pars <- callModule(fitPars, "dyna_model_pars")
     dyna_model_fit <- callModule(dynamicModel, "dyna_model_pars", 
                                   dyna_temp_profile = dyna_temp_profile, dyna_micro_data = dyna_micro_data)
@@ -694,7 +718,8 @@ shinyServer(function(input, output, session) {
     #' Data input
     
     interv_temp_profile <- callModule(tableFile, "interv_temp_input",
-                                      label_2 = "temperature")
+                                      label_2 = "temperature",
+                                      default_data = data.frame(c(0, 10), c(70, 80)))
     
     #' Calculation
     
