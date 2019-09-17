@@ -58,6 +58,15 @@ par_description_map <- data.frame(
 
 shinyServer(function(input, output, session) {
     
+    ## Manual
+    
+    output$download_manual <- downloadHandler(
+        filename = "manual_Bioinactivatino.pdf",
+        content = function(file) {
+            file.copy("manual_Bioinactivation.pdf", file)
+        }
+    )
+    
     ## Popup message
     
     # toggleModal(session, "startupModal", toggle = "open")
@@ -151,7 +160,8 @@ shinyServer(function(input, output, session) {
             need(pred_temp_profile(), "Define a temperature profile")
         })
 
-        my_temperature <- as.data.frame(pred_temp_profile()) %>% na.omit()
+        my_temperature <- as.data.frame(pred_temp_profile()) %>% 
+            filter(!is.na(temperature))
 
         times <- seq(0, max(my_temperature$time), length = 100)
         
@@ -211,9 +221,10 @@ shinyServer(function(input, output, session) {
             select(time, logN)
         
         my_obs <- pred_micro_data() %>%
+            as.data.frame() %>%
             mutate(logN = log10(N)) %>%
             select(time, logN)
-        
+
         modCost(model = my_simulation,
                 obs = my_obs)
     })
@@ -505,6 +516,7 @@ shinyServer(function(input, output, session) {
             select(time, logN)
 
         my_data <- dyna_micro_data() %>%
+            as.data.frame() %>%
             mutate(logN = log10(N)) %>%
             select(time, logN)
 
@@ -721,6 +733,13 @@ shinyServer(function(input, output, session) {
                                       label_2 = "temperature",
                                       default_data = data.frame(c(0, 10), c(70, 80)))
     
+    interv_micro_data <- callModule(tableFile, "interv_micro_data",
+                                    default_data = data.frame(c(0, 5, 7.5, 2.5, 6, 8),
+                                                              c(1e6, 1e5, 15000, 800000, 30000, 1e3)
+                                    )
+    )
+    
+    
     #' Calculation
     
     interv_prediction_interval <- eventReactive(input$interv_calculate, {
@@ -728,9 +747,11 @@ shinyServer(function(input, output, session) {
         validate(need(dyna_model_fit(),
                       message = "A model must be fitted first."))
         
-        my_temperature <- as.data.frame(interv_temp_profile()) %>% na.omit()
+        my_temperature <- as.data.frame(interv_temp_profile()) %>% 
+            filter(!is.na(temperature)) %>%
+            as.data.frame()
         
-        times <- seq(0, max(my_temperature$time), length = 50)
+        times <- seq(0, max(my_temperature$time, na.rm = TRUE), length = 50)
         
         withProgress(message = "Calculating interval", {
             
@@ -745,9 +766,17 @@ shinyServer(function(input, output, session) {
         
         validate(need(interv_prediction_interval(), message = FALSE))
         
-        plot(interv_prediction_interval()) +
+        p <- plot(interv_prediction_interval()) +
             xlab(input$interv_xlabel) + ylab(input$interv_ylabel) +
             ylim(input$interv_ymin, input$interv_ymax)
+        
+        if (!is.null(interv_micro_data())) {
+            p <- p + geom_point(aes(x = time, y = log10(N)), data = interv_micro_data(),
+                                inherit.aes = FALSE)
+        }
+        
+        p
+            
         
     })
     

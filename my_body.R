@@ -367,6 +367,15 @@ body <- dashboardBody(
                                 default_frame = data.frame(c(0, 10), c(70, 80)))
                 ),
                 fluidRow(
+                    tableFileUI("interv_micro_data",
+                                inputBoxTitle = "Input Microbial counts",
+                                outputBoxTitle = "Microbial data",
+                                default_frame = data.frame(c(0, 5, 7.5, 2.5, 6, 8),
+                                                           c(1e6, 1e5, 15000, 800000, 30000, 1e3)
+                                )
+                    )
+                ),
+                fluidRow(
                     box(title = "Parameters prediction interval",
                         status = "primary", solidHeader = TRUE, collapsible = TRUE,
                         sliderInput("interv_quantile", "Quantile of the response",
@@ -421,7 +430,8 @@ of Applied Mathematics and Food Microbiology of the Technical University of Cart
                 tags$p("and/or"),
                 tags$p("Garre, A., Clemente-Carazo, M., Fernandez, P. S., Lindqvist, R., & Egea, J. A. (2018).
                        Bioinactivation FE: A free web application for modelling isothermal and dynamic microbial inactivation. 
-                       Food Research International, 112, 353–360. https://doi.org/10.1016/j.foodres.2018.06.057")
+                       Food Research International, 112, 353–360. https://doi.org/10.1016/j.foodres.2018.06.057"),
+                downloadLink("download_manual", "Download manual")
                 
                 ),
         
