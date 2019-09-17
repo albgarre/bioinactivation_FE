@@ -9,7 +9,8 @@ dynamicModel <- function(input, output, session, dyna_temp_profile, dyna_micro_d
       need(dyna_temp_profile(), "Define a temperature profile")
     })
 
-    my_temperature <- as.data.frame(dyna_temp_profile()) %>% na.omit()
+    my_temperature <- as.data.frame(dyna_temp_profile()) %>% 
+      filter(!is.na(temperature))
 
     times <- seq(0, max(my_temperature$time), length = 200)
 
@@ -329,12 +330,15 @@ dynamicModel <- function(input, output, session, dyna_temp_profile, dyna_micro_d
   
   dyna_model_fit <- eventReactive(input$dyna_fit_button, {
 
-    my_temperature <- as.data.frame(dyna_temp_profile()) %>% na.omit()
+    my_temperature <- as.data.frame(dyna_temp_profile()) %>% 
+      filter(!is.na(temperature)) %>%
+      as.data.frame()
 
     my_model <- dyna_pars()$model
 
     my_data <- dyna_micro_data() %>%
-      mutate(logN = log10(N))
+      mutate(logN = log10(N)) %>%
+      as.data.frame()
 
     withProgress(message = "Fitting model", {
 
