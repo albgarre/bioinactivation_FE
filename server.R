@@ -25,7 +25,7 @@ source("tableFile3col.R")
 source("isofitPars.R")
 source("dynamicModel.R")
 
-# library(FSK2R)
+library(FSK2R)
 library(readxl)
 # library(DT)
 library(rhandsontable)
@@ -83,25 +83,291 @@ shinyServer(function(input, output, session) {
     
     ## FSK2R
     
-    output$fsk_pred_download <- downloadHandler(filename = function() {
-        paste("output", "zip", sep=".")
-    },
-    content = function(con) {
-        
-        my_fsk <- create_fsk(r_model = "model.r",
-                             r_visualization = "visualization.r")
-        
-        my_fsk <- read_fsk_metadata_excel(my_fsk, "template_predictions.xlsx")
-        export_fsk(my_fsk, con)
-        
-    },
-    contentType = "application/zip"
+    output$fsk_pred_download <- downloadHandler(
+        filename = "predictive_model.fskx",
+        content = function(file) {
+            
+            ## Import the 'basic' model
+            
+            my_fsk <- import_fsk("fskBioinactivation.fskx")
+            
+            ## Metadata - general informatino
+            
+            my_fsk$metadata$generalInformation$name <- input$fsk_pred_name
+            my_fsk$metadata$generalInformation$source <- input$fsk_pred_source
+            my_fsk$metadata$generalInformation$identifier <- input$fsk_pred_identifier
+            my_fsk$metadata$generalInformation$creationDate <- input$fsk_pred_date
+            my_fsk$metadata$generalInformation$rights <- input$fsk_pred_rights
+            my_fsk$metadata$generalInformation$language <- input$fsk_pred_language
+            
+            creators <- hot_to_r(input$fsk_pred_creators) %>%
+                mutate(eClass = "http://BfR/bund/de/knime/model/metadata_V1.0.3#//Contact")
+            
+            authors <- hot_to_r(input$fsk_pred_authors) %>%
+                mutate(eClass = "http://BfR/bund/de/knime/model/metadata_V1.0.3#//Contact")
+            
+            refs <- hot_to_r(input$fsk_pred_reference) %>%
+                mutate(eClass = "http://BfR/bund/de/knime/model/metadata_V1.0.3#//Reference",
+                       isReferenceDescription = TRUE
+                       )
+            
+            my_fsk$metadata$generalInformation$creators <- apply(creators, 1, as.list)
+            my_fsk$metadata$generalInformation$author <- apply(authors, 1, as.list)
+            my_fsk$metadata$generalInformation$reference <- apply(refs, 1, as.list)
+            
+            ## Metadata - scope
+            
+            my_fsk$metadata$scope$generalComment <- input$fsk_pred_genCom
+            
+            
+            prods <- hot_to_r(input$fsk_pred_product) %>%
+                mutate(eClass = "http://BfR/bund/de/knime/model/metadata_V1.0.3#//Product")
+            
+            my_fsk$metadata$scope$product <- apply(prods, 1, as.list)
+            
+            haz <- hot_to_r(input$fsk_pred_hazard) %>%
+                mutate(eClass = "http://BfR/bund/de/knime/model/metadata_V1.0.3#//Hazard")
+            
+            my_fsk$metadata$scope$hazard <- apply(haz, 1, as.list)
+            
+            ## Metadata - data background
+            
+            my_fsk$metadata$dataBackground$study <- input$fsk_pred_studyTitle
+            
+            ## Metadata - model parameters
+            
+            model_name <- paste0("'", pred_simulation()$model, "'")
+            max_time <- max(pred_simulation()$simulation$time)
+            
+            times <- paste0("seq(0, ", max_time, ", length=100)")
+            
+            my_temperature <- as.data.frame(pred_temp_profile()) %>% 
+                filter(!is.na(temperature))
+            
+            time_points <- my_temperature$time
+            temp_points <- my_temperature$temperature
+            
+            time_points <- paste(time_points, collapse = ",")
+            time_points <- paste0("c(", time_points, ")")
+            temp_points <- paste(temp_points, collapse = ",")
+            temp_points <- paste0("c(", temp_points, ")")
+            
+            
+            
+            par_table <- hot_to_r(input$fsk_pred_model) %>%
+                rename(parameterID = parameter,
+                       parameterUnit = unit,
+                       parameterDescription = description,
+                       parameterValueMin = Min.value,
+                       parameterValueMax = Max.value,
+                       parameterValue = estimate
+                ) %>%
+                mutate(eClass = "http://BfR/bund/de/knime/model/metadata_V1.0.3#//Parameter",
+                       parameterName = parameterID,
+                       parameterClassification = "Input",
+                       parameterUnitCategory = "NA",
+                       parameterDataType = "Double",
+                       parameterSource = "NA",
+                       parameterSubject = "NA",
+                       parameterDistribution = "Constant",
+                       parameterVariabilitySubject = "NA",
+                       parameterError = "NA"
+                )
+            
+            other_pars <- tibble(parameterID = c("model_name", "max_time", "time_points", "temp_points"),
+                                 parameterName = c("model_name", "max_time", "time_points", "temp_points"),
+                                 parameterDescription = c("Inactivation model", "Maximum time for the simulation",
+                                                          "Time points of the temperature profile",
+                                                          "Temperature points of the temperature profile"),
+                                 parameterValue = c(model_name, max_time, time_points, temp_points),
+                                 eClass ="http://BfR/bund/de/knime/model/metadata_V1.0.3#//Parameter",
+                                 parameterUnit = "",
+                                 parameterValueMin = "",
+                                 parameterValueMax = "",
+                                 parameterClassification = "Input",
+                                 parameterUnitCategory = "NA",
+                                 parameterDataType = c("Character", "Double", "Double", "Double"),
+                                 parameterSource = "NA",
+                                 parameterSubject = "NA",
+                                 parameterDistribution = "Constant",
+                                 parameterVariabilitySubject = "NA",
+                                 parameterError = "NA")
+            
+            list_par_table <- apply(par_table, 1, as.list)
+            list_par_other <- apply(other_pars, 1, as.list)
+            
+            my_fsk$metadata$modelMath$parameter <- c(list_par_table, list_par_other)
+            
+            ## Define the simulation
+            
+            par_sims <- lapply(1:nrow(par_table), function(i) {
+                
+                new_elem <- list()
+                attr(new_elem, "newValue") <- par_table$parameterValue[i]
+                attr(new_elem, "target") <- par_table$parameterID[i]
+                new_elem
+                
+            })
+            
+            other_sims <- lapply(1:nrow(other_pars), function(i) {
+                
+                new_elem <- list()
+                attr(new_elem, "newValue") <- other_pars$parameterValue[i]
+                attr(new_elem, "target") <- other_pars$parameterID[i]
+                new_elem
+                
+            })
+            
+            my_sims <- c(par_sims, other_sims)
+            
+            my_sims <- set_names(my_sims, rep("changeAttribute", length(my_sims)))
+            
+            # print(my_sims)
+            
+            my_fsk$simulation$sedML$listOfModels$model$listOfChanges <- my_sims
+            
+            ## Export the model
+            
+            export_fsk(my_fsk, file)
+            
+            
+            # file.copy("ToyModelv4.fskx", file)
+        }
     )
     
     output$fsk_pred_creators <- renderRHandsontable({
-        rhandsontable(data.frame(Email = c("google@chucknorris.com", NA), `Family name` = c("Doe", NA), `Given Name` = c("Jon", NA)),
-                      rowHeaders = NULL, readOnly = FALSE
-                      )
+        # rhandsontable(data.frame(Email = c("google@chucknorris.com", NA), `Family name` = c("Doe", NA), `Given Name` = c("Jon", NA)),
+        #               rowHeaders = NULL, readOnly = FALSE
+        #               )
+        
+        default_data <- data.frame(
+            title = "",
+            familyName = "",
+            givenName = "",
+            email = "",
+            telephone = "",
+            streetAdress = "",
+            country = "",
+            city = "",
+            region = "",
+            organization = ""
+            )
+        
+        if (!is.null(input$fsk_pred_creators)) {
+            DF = hot_to_r(input$fsk_pred_creators)
+        } else {
+            DF = default_data
+        }
+        
+        DF %>%
+            rhandsontable() %>%
+            hot_table(highlightCol = TRUE, highlightRow = TRUE)
+    })
+    
+    output$fsk_pred_authors <- renderRHandsontable({
+        
+        default_data <- data.frame(
+            title = "",
+            familyName = "",
+            givenName = "",
+            email = "",
+            telephone = "",
+            streetAdress = "",
+            country = "",
+            city = "",
+            region = "",
+            organization = ""
+        )
+        
+        if (!is.null(input$fsk_pred_authors)) {
+            DF = hot_to_r(input$fsk_pred_authors)
+        } else {
+            DF = default_data
+        }
+        
+        DF %>%
+            rhandsontable() %>%
+            hot_table(highlightCol = TRUE, highlightRow = TRUE)
+    })
+    
+    output$fsk_pred_reference <- renderRHandsontable({
+        
+        default_data <- data.frame(
+            publicationType = "",
+            publicationDate = "",
+            doi = "",
+            authorList = "",
+            publicationTitle = "",
+            publicationAbstract = "",
+            publicationStatus = "",
+            publicationWebsite = "",
+            comment = ""
+        )
+        
+        if (!is.null(input$fsk_pred_reference)) {
+            DF = hot_to_r(input$fsk_pred_reference)
+        } else {
+            DF = default_data
+        }
+        
+        DF %>%
+            rhandsontable() %>%
+            hot_table(highlightCol = TRUE, highlightRow = TRUE)
+    })
+    
+    output$fsk_pred_product <- renderRHandsontable({
+        
+        default_data <- data.frame(
+            productName = "",
+            productDescription = "",
+            productUnit = "",
+            productionMethod = "",
+            packaging = "",
+            productTreatment = "",
+            originCountry = "",
+            originArea = "",
+            fisheriesArea = "",
+            productionDate = "",
+            expiryDate = ""
+        )
+        
+        if (!is.null(input$fsk_pred_product)) {
+            DF = hot_to_r(input$fsk_pred_product)
+        } else {
+            DF = default_data
+        }
+        
+        DF %>%
+            rhandsontable() %>%
+            hot_table(highlightCol = TRUE, highlightRow = TRUE)
+    })
+    
+    output$fsk_pred_hazard <- renderRHandsontable({
+        
+        default_data <- data.frame(
+            hazardType = "",
+            hazardName = "",
+            hazardDescription = "",
+            hazardUnit = "",
+            adverseEffect = "",
+            sourceOfContamination = "",
+            maximumResidueLimit = "",
+            noObservedAdverseAffectLevel = "",
+            lowestObservedAdverseAffectLevel = "",
+            acceptableOperatorExposureLevel = "",
+            acuteReferenceDose = "",
+            acceptableDailyIntake = ""
+        )
+        
+        if (!is.null(input$fsk_pred_hazard)) {
+            DF = hot_to_r(input$fsk_pred_hazard)
+        } else {
+            DF = default_data
+        }
+        
+        DF %>%
+            rhandsontable() %>%
+            hot_table(highlightCol = TRUE, highlightRow = TRUE)
     })
     
     output$fsk_pred_model <- renderRHandsontable({
@@ -194,8 +460,8 @@ shinyServer(function(input, output, session) {
             logN0 <- pred_simulation()$simulation$logN[1]
             t_D <- time_to_logreduction(input$pred_tgr_logreductions, pred_simulation())
             
-            print(logN0)
-            print(t_D)
+            # print(logN0)
+            # print(t_D)
             
             if (!is.na(t_D)) {
                 

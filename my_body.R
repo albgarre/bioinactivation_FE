@@ -93,34 +93,33 @@ body <- dashboardBody(
                     box(title = "Export as FSK", status = "danger", solidHeader = TRUE, collapsible = TRUE,
                         tabsetPanel(
                             tabPanel("General Information",
-                                     textInput("fsk_pred_name", "Name"),
+                                     textInput("fsk_pred_name", "Model name"),
                                      textInput("fsk_pred_source", "Source"),
                                      textInput("fsk_pred_identifier", "Identifier"),
                                      dateInput("fsk_pred_date", "Creation Date"),
                                      textInput("fsk_pred_rights", "Rights", value = "Creative Commons Attribution-NonCommercial 4.0"),
                                      textInput("fsk_pred_language", "Language", value = "English"),
                                      tags$h4("Creators"),
-                                     # rHandsontableOutput("fsk_pred_creators")
-                                     matrixInput("fsk_pred_creators", "Email - Family name - Given name",
-                                                 data = data.frame(email = "someone@mail.com", f_name = "Doe", g_name = "Jon")
-                                                 )
-
+                                     rHandsontableOutput("fsk_pred_creators"),
+                                     tags$h4("Authors"),
+                                     rHandsontableOutput("fsk_pred_authors"),
+                                     tags$h4("Reference"),
+                                     rHandsontableOutput("fsk_pred_reference")
                             ),
                             tabPanel("Scope",
-                                     textInput("fsk_pred_productName", "Product unit"),
-                                     textInput("fsk_pred_hazardName", "Hazard name"),
-                                     textInput("fsk_pred_hazardDescript", "Hazard description"),
-                                     textInput("fsk_pred_hazardType", "Hazard type")
+                                     textInput("fsk_pred_genCom", "General comment"),
+                                     tags$h4("Product/Matrix"),
+                                     rHandsontableOutput("fsk_pred_product"),
+                                     tags$h4("Hazard"),
+                                     rHandsontableOutput("fsk_pred_hazard")
                             ),
                             tabPanel("Data background",
-                                     textInput("fsk_pred_title", "Study title"),
-                                     textInput("fsk_pred_descrtiption", "Study Description")
+                                     textInput("fsk_pred_studyTitle", "Study title")
                             ),
                             tabPanel("Model math",
                                      rHandsontableOutput("fsk_pred_model")
                                      ),
                             tabPanel("Export",
-                                     # textInput("fsk_pred_filename", "File name", value = "pred_from_bioinactivation.fskx"),
                                      downloadButton("fsk_pred_download", "Download")
                             )
                         )
